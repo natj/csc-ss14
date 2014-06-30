@@ -5,7 +5,7 @@
 Clone repository to your local computer (if not already done)
 
 ```
-git clone https://github.com/natj/cronus.git
+git clone https://github.com/natj/csc-ss14.git
 ```
 
 and keep it updated by pulling from Github
