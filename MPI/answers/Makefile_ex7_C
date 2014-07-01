@@ -1,0 +1,36 @@
+COMP=gnu
+
+ifeq ($(COMP),cray)
+CC=cc
+CCFLAGS=-O3 -I/appl/opt/libpng/include
+LIBS=-L/appl/opt/libpng/lib -lpng -lz
+endif
+
+ifeq ($(COMP),gnu)
+CC=mpicc
+CCFLAGS=-O3 -Wall
+LIBS=-lpng
+endif
+
+
+EXE1=ex7_heat_mpi
+OBJS1=pngwriter.o ex7_heat_mpi.o ex4_main.o
+
+all: $(EXE1)
+
+pngwriter.o:	pngwriter.c pngwriter.h
+ex7_heat_mpi.o:	ex7_heat_mpi.c heat_mpi.h
+ex4_main.o:	ex4_main.c heat_mpi.h
+
+.PHONY: $(EXE1)
+
+$(EXE1): $(OBJS1) .ALWAYSEXEC
+	$(CC) $(FCFLAGS) $(OBJS1) -o $@ $(LIBS)
+
+%.o: %.c
+	$(CC) $(CCFLAGS) -c $< -o $@
+
+clean:
+	-/bin/rm -f $(EXE1) a.out *.o 
+
+.ALWAYSEXEC:

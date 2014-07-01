@@ -1,0 +1,18 @@
+
+#grp work 1
+######
+cut -f1 mtcars.txt | cut -f1 -d " " | grep -v "#" | sort | uniq -c | sort -r
+
+#grp work 2
+######
+cat mtcars.txt | awk -F "\t" '{print $5}' | sort | uniq -c
+
+#grp work 3
+######
+grep -i 'merc' | sort -r --keys=4 | cut -f1,4
+
+#grp work 4
+######
+cat mtcars.txt | awk -F "\t" '!/#/{if ($3 > 4){ print $2 OFS "\t" $1}}' | sort -r | awk -F "\t" '{print $2 OFS "\t" $1}'
+
+cat mtcars.txt | awk -F "\t" '!/#/{if ($3 > 4){ print $2 OFS "\t" $1}}' | sort -r --keys=2

@@ -1,0 +1,27 @@
+##Problem 1. 
+
+#Define the field separator for awk with -F, discard the first line starting with '#' and print first field (car brand and model) from each line  
+#Cut the first field to get the brand and sort them before counting them with uniq. 
+#Then again sort numerically with -n and in reverse order with-r (default is increasing order)
+
+    cat mtcars.txt | awk  -F "\t" '$0~!"#"{print $1}' | cut -d " " -f 1 | sort | uniq -c |sort -nr
+
+##Problem 2. 
+
+#Define the field separator for awk with -F, discard the first line starting with '#' and print the 5th field (automatic or manual)
+#Sort them and count them with uniq
+
+    cat mtcars.txt | awk -F "\t" '$0 !~ "#" {print $5}' | sort | uniq -c
+
+##Problem 3
+
+#Grep all lines with "Merc" and sort them numerically (-n) in reverse order (-r) from the 4th field (-k 4). The field separator for sort is defined with -t $'\t'
+    
+    cat mtcars.txt | grep "Merc" | sort -nrk4 -t $'\t'
+ 
+##Problem 4.
+
+#Field separator for awk with -F and discard the first line and pick the lines that have more than 4 cyl. From those print first and second field separated by tab.
+#Last sort numerically (-g for general) by the second column. -t for the separator.
+ 
+    cat mtcars.txt | awk -F "\t" '$0!~"#" && $3>4 {print $1"\t"$2}' | sort -gk2 -t $'\t'

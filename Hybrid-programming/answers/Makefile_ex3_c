@@ -1,0 +1,38 @@
+COMP=pgi
+
+ifeq ($(COMP),gnu)
+CC=mpicc
+FC=mpif90
+CCFLAGS=-g
+RUN=
+endif
+
+ifeq ($(COMP),pgi)
+CC=mpicc
+FC=mpif90
+CCFLAGS=-g -acc -ta=nvidia,kepler+
+# CCFLAGS=-g -traceback
+RUN=
+endif
+
+EXE=ex3_helloacc
+OBJS=ex3_helloacc.c
+
+EXES=$(EXE)
+
+all: $(EXES)
+
+# Dependencies
+ex3_helloacc.o: ex3_helloacc.c
+
+$(EXE): $(OBJS) .ALWAYSEXEC
+	$(CC) $(CCFLAGS) $(OBJS) -o $@
+
+%.o: %.c
+	$(CC) $(CCFLAGS) -c $< -o $@
+
+clean:
+	-/bin/rm -f $(EXES)
+	-/bin/rm -f a.out *.o *.mod *~ *.png
+
+.ALWAYSEXEC:

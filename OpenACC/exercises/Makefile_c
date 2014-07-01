@@ -1,0 +1,71 @@
+COMP=pgi
+
+ifeq ($(COMP),pgi)
+CC=pgcc
+CCFLAGS=-g -O3 -acc -ta=tesla,kepler+
+# CCFLAGS=-g -traceback
+# CCFLAGS=-g -O3
+RUN=
+endif
+
+EXE1=ex1_hello
+OBJS1=ex1_hello.o
+
+EXE2=ex2_sum
+OBJS2=ex2_sum.o
+
+EXE3=ex3_dotprod
+OBJS3=ex3_dotprod.o
+
+EXE4=ex4_data
+OBJS4=ex4_data.o
+
+EXE5a=bonus_ex5a
+OBJS5a=pngwriter.o heat_5a.o bonus_ex5a.o
+
+EXE5b=bonus_ex5b
+OBJS5b=pngwriter.o heat_5b.o bonus_ex5b.o
+
+EXES=$(EXE1) $(EXE2) $(EXE3) $(EXE4) $(EXE5a) $(EXE5b)
+
+all: $(EXES)
+
+# Dependencies
+ex1_hello.o: ex1_hello.c
+ex2_sum.o: ex2_sum.c
+ex3_dotprod.o: ex3_dotprod.c
+ex4_data.o: ex4_data.c
+bonus_ex5a.o: pngwriter.o heat_5a.o bonus_ex5a.c
+bonus_ex5b.o: pngwriter.o heat_5b.o bonus_ex5b.c
+
+heat_5a.o: heat_5a.c
+heat_5b.o: heat_5b.c
+pngwriter.o: pngwriter.c
+
+
+$(EXE1): $(OBJS1) .ALWAYSEXEC
+	$(CC) $(CCFLAGS) $(OBJS1) -o $@
+
+$(EXE2): $(OBJS2) .ALWAYSEXEC
+	$(CC) $(CCFLAGS) $(OBJS2) -o $@
+
+$(EXE3): $(OBJS3) .ALWAYSEXEC
+	$(CC) $(CCFLAGS) $(OBJS3) -o $@
+
+$(EXE4): $(OBJS4) .ALWAYSEXEC
+	$(CC) $(CCFLAGS) $(OBJS4) -o $@ -lm
+
+$(EXE5a): $(OBJS5a) .ALWAYSEXEC
+	$(CC) $(CCFLAGS) $(OBJS5a) -o $@ -lpng
+
+$(EXE5b): $(OBJS5b) .ALWAYSEXEC
+	$(CC) $(CCFLAGS) $(OBJS5b) -o $@ -lpng
+
+%.o: %.c
+	$(CC) $(CCFLAGS) -c $< -o $@
+
+clean:
+	-/bin/rm -f $(EXES)
+	-/bin/rm -f a.out *.o *~ *.png
+
+.ALWAYSEXEC:
