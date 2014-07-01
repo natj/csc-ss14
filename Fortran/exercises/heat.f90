@@ -61,6 +61,16 @@ contains
     type(field), intent(inout) :: field0
 
     ! TODO: Implement field initialization as in exercise 2
+    !DONE(?)
+    allocate(field0%data(0:field0%nx+1, 0:field0%ny+1))
+
+    ! initialize boundaries
+    field0%data(:,:) = real(0.0, dp) !default value
+    field0%data(0,:) = real(5.0) !left
+    field0%data(field0%nx+1,:) = real(20.0) !right
+    field0%data(:,0) = real(45.0) !top
+    field0%data(:,field0%ny+1) = real(85.0) !bottom
+
   end subroutine initialize
 
   ! Swap the data fields of two variables of type field
@@ -123,8 +133,22 @@ contains
 
     type(field), intent(inout) :: curr, prev
     real(kind=dp) :: a, dt
-   
+    real(kind=dp) :: dx2, dy2
+    integer :: nx, ny
+
     ! TODO: Implement time evolution with discretized laplacian
+    ! DONE (?)
+    nx = curr%nx
+    ny = curr%ny
+    dx2 = curr%dx2
+    dy2 = curr%dy2
+
+    curr%data(1:nx, 1:ny) = prev%data(1:nx, 1:ny) + dt*a* &
+         ((prev%data(0:nx-1, 1:ny) - 2.0*prev%data(1:nx, 1:ny) + &
+         prev%data(2:nx+1, 1:ny))/dx2 + &
+         (prev%data(1:nx, 0:ny-1) - 2.0*prev%data(1:nx, 1:ny) + &
+         prev%data(1:nx, 2:ny+1))/dy2)
+
   end subroutine evolve
 
   ! Output routine, saves the temperature distribution as a png image

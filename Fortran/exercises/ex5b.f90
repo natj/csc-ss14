@@ -5,9 +5,10 @@ program ex5b
   integer, parameter :: m=258, n=258
   real(kind=dp), parameter :: dx=real(0.01,dp), dy=real(0.01,dp)
 
-  ! TODO: Declare arrays
+  !Declare arrays
   integer :: i
-  
+  real(kind=dp) :: x(m, n), y(m, n)  
+
   y=real(0,dp)
 
   call set_initial_values(x)
@@ -54,9 +55,17 @@ program ex5b
       real(kind=dp), intent(in) :: x(:,:)
       real(kind=dp), intent(out) :: y(:,:)
       real(kind=dp), intent(in) :: dx, dy
+      integer :: m, n
       
       ! TODO: Implement finite-difference Laplacian with array syntax
-      
+      m = size(x, 1)
+      n = size(x, 2)
+
+      y(2:m-1, 2:n-1) = (x(1:m-2, 2:n-1) - 2.0*x(2:m-1, 2:n-1) + &
+           x(3:m, 2:n-1))/dx**2 + &
+           (x(2:m-1, 1:n-2) - 2.0*x(2:m-1, 2:n-1) + &
+           x(2:m-1, 3:n))/dy**2
+
     end subroutine apply_fd_laplacian
 
     function check_result(x, y, dx, dy) result(iscorrect)
