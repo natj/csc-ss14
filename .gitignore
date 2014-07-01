@@ -1,4 +1,15 @@
+#OSX /UNIX specific things
 .DS_Store
 .svn/
 */.svn/
 *~
+\#*#
+*/\#*#
+*/.#*
+
+#fortran things
+*.a
+*.o
+
+#other things
+*.png

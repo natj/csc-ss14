@@ -5,7 +5,8 @@ program ex5a
   integer, parameter :: m=258, n=258
   real(kind=dp), parameter :: dx=real(0.01,dp), dy=real(0.01,dp)
 
-  ! TODO: Declare arrays
+  ! Declare arrays
+  real(kind=dp) :: x(m,n), y(m,n)
   integer :: i
   
   y=real(0,dp)
@@ -54,9 +55,20 @@ program ex5a
       real(kind=dp), intent(in) :: x(:,:)
       real(kind=dp), intent(out) :: y(:,:)
       real(kind=dp), intent(in) :: dx, dy
+      integer :: i,j,m,n
       
-      ! TODO: Implement finite-difference Laplacian with loops
-   
+      !get array dimensions (assume start index 1)
+      m = size(x,1)
+      n = size(x,2)
+
+      ! finite-difference Laplacian with loops
+      do i = 2,m-1
+         do j = 2,n-1
+            y(i,j) = (x(i-1,j) - 2.0*x(i,j) + x(i+1,j))/dx**2 + &
+                 (x(i, j-1) - 2.0*x(i,j) + x(i, j+1))/dy**2
+         end do
+      end do
+
     end subroutine apply_fd_laplacian
 
     function check_result(x, y, dx, dy) result(iscorrect)
