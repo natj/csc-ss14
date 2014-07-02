@@ -28,10 +28,36 @@ contains
     character(len=*), intent(in) :: filename
 
     integer, parameter :: funit = 10
-    integer :: nx, ny, i, stat
+    integer :: nx, ny, i
     character(len=2) :: dummy
 
-    ! Implement reading of data from a file with a given name
+    ! reading of data from a file with a given name
+    open(funit, file=filename, status='old')
+
+    ! read column and row sizes
+    read(funit, *), dummy, nx, ny
+    write(*,*) 'nx=', nx, 'ny=',ny
+
+    ! initialize field & remember ghost cells
+    call initialize_field_metadata(field0, nx, ny)
+    allocate(field0%data(0:nx+1, 0:ny+1))
+    field0%data = 0.0
+
+    ! read line by line into data
+    do i = 1,nx
+       !write(*,*) 'i=',i
+       read(funit, *) field0%data(i, 1:ny)
+       !write(*,*) ' '
+       !write(*,*) field0%data(i, 1:ny)
+    enddo
+    close(funit)
+
+    ! set boundaries
+    field0%data(0, 1:ny) = field0%data(1, 1:ny) 
+    field0%data(nx+1, 1:ny) = field0%data(nx, 1:ny) 
+    field0%data(1:nx, 0) = field0%data(1:nx, 1)
+    field0%data(1:nx, ny+1) = field0%data(1:nx, ny)
+
   end subroutine read_input
   
   subroutine initialize_field_metadata(field0, nx, ny)

@@ -61,7 +61,6 @@ contains
     type(field), intent(inout) :: field0
 
     ! TODO: Implement field initialization as in exercise 2
-    !DONE(?)
     allocate(field0%data(0:field0%nx+1, 0:field0%ny+1))
 
     ! initialize boundaries
@@ -137,7 +136,6 @@ contains
     integer :: nx, ny
 
     ! TODO: Implement time evolution with discretized laplacian
-    ! DONE (?)
     nx = curr%nx
     ny = curr%ny
     dx2 = curr%dx2
@@ -220,12 +218,40 @@ contains
     implicit none
 
     type(field), intent(out) :: field0
-    character(len=85), intent(in) :: filename
+    character(len=*), intent(in) :: filename
 
+    integer, parameter :: funit = 10
     integer :: nx, ny, i
     character(len=2) :: dummy
 
-    ! TODO: Implement reading of data from a file
+    ! reading of data from a file with a given name
+    open(funit, file=filename, status='old')
+
+    ! read column and row sizes
+    read(funit, *), dummy, nx, ny
+    write(*,*) 'nx=', nx, 'ny=',ny
+
+    ! initialize field & remember ghost cells
+    call initialize_field_metadata(field0, nx, ny)
+    allocate(field0%data(0:nx+1, 0:ny+1))
+
+    field0%data = 0.0
+
+    ! read line by line into data
+    do i = 1,nx
+       !write(*,*) 'i=',i
+       read(funit, *) field0%data(i, 1:ny)
+       !write(*,*) ' '
+       !write(*,*) field0%data(i, 1:ny)
+    enddo
+    close(funit)
+
+    ! set boundaries
+    field0%data(0, 1:ny) = field0%data(1, 1:ny) 
+    field0%data(nx+1, 1:ny) = field0%data(nx, 1:ny) 
+    field0%data(1:nx, 0) = field0%data(1:nx, 1)
+    field0%data(1:nx, ny+1) = field0%data(1:nx, ny)
+
   end subroutine read_input
 
 end module heat
