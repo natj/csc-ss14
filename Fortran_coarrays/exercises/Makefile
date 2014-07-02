@@ -4,7 +4,7 @@ ifeq ($(COMP),cray)
 CC=cc
 FC=ftn 
 CCFLAGS=-O3
-FCFLAGS=-efmw
+FCFLAGS=-efmw -dynamic
 endif
 
 ifeq ($(COMP),gnu)

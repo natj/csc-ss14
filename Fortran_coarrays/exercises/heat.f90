@@ -61,15 +61,34 @@ contains
     implicit none
 
     type(field), intent(inout) :: field0[*]
+    integer :: nx, ny
 
     ! The arrays for field contain also a halo region
     allocate(field0%data(0:field0%nx+1, 0:field0%ny+1))
 
+
+    nx = field0%nx
+    ny = field0%ny
+
     field0%data(:,:) = 0.0_dp
 
-    ! TODO: initialize the temperature field in the images such that
+    ! initialize the temperature field in the images such that
     ! the full grid corresponds to the serial case (see the comment
     ! above)
+
+    !left column
+    if(this_image() == 1) then
+       field0%data(:,0) = 85.0_dp
+    end if
+    !right column
+    if(this_image() == num_images()) then
+       field0%data(:,ny+1) = 20.0_dp
+    end if
+
+    !top & bottom
+    field0%data(0,:) = 15.0_dp
+    field0%data(nx+1,:) = 10.0_dp
+
    end subroutine initialize
 
   ! Swap the data fields of two variables of type field
@@ -134,13 +153,17 @@ contains
     ub_y = ubound(from_field%data,2)
 
     sync all
-    ! TODO:
     ! read the leftmost column of the image on the right to the right halo region
     ! the board is non-periodic, hence the last image does not read
-
-    ! TODO:
+    if(me < num_images()) then
+       from_field%data(:,ub_y) = from_field[me+1]%data(:,lb_y)
+    end if
+    
     ! read the rightmost column of the image on the left to the left halo region
     ! the board is non-periodic, hence the first image does not read
+    if(me > 1) then
+       from_field%data(:,lb_y) = from_field[me-1]%data(:, ub_y)
+    end if
 
   end subroutine exchange
     
