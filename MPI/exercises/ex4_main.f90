@@ -39,7 +39,7 @@ program heat_solve
   logical :: using_input_file
 
   ! TODO start: initialize MPI
-
+  call mpi_init(ierr)
   ! TODO end
 
   ! Default values for grid size and time steps
@@ -108,7 +108,7 @@ program heat_solve
   call parallel_finalize(parallelization)
 
   ! TODO start: finalize MPI
-
+  call mpi_finalize(ierr)
   ! TODO end
 
 contains

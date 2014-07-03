@@ -1,4 +1,4 @@
-COMP=cray
+COMP=gnu
 
 ifeq ($(COMP),cray)
 CC=cc
@@ -12,7 +12,8 @@ ifeq ($(COMP),gnu)
 CC=gcc
 FC=mpif90
 CCFLAGS=-O3
-FCFLAGS=-O3
+FCFLAGS=-O3 -dynamic
+LIBS=-lpng
 endif
 
 ifeq ($(COMP),intel)

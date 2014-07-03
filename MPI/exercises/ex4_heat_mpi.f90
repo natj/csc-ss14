@@ -216,9 +216,17 @@ contains
 
     ! TODO start: implement halo exchange
     ! Send to left, receive from right
+    call mpi_send(field0%data(:, 1), field0%nx+2, MPI_DOUBLE_PRECISION, &
+         parallel%nleft, 11, parallel%comm, ierr)
+    call mpi_recv(field0%data(:, field0%ny+1), field0%nx+2, MPI_DOUBLE_PRECISION, &
+         parallel%nright, 11, parallel%comm, MPI_STATUS_IGNORE, ierr)
+    !call mpi_sendrecv
 
     ! Send to right, receive from left
-
+    call mpi_send(field0%data(:,field0%ny), field0%nx+2, MPI_DOUBLE_PRECISION, &
+         parallel%nright, 12, parallel%comm, ierr)
+    call mpi_recv(field0%data(:,0), field0%nx+2, MPI_DOUBLE_PRECISION, &
+         parallel%nleft, 12, parallel%comm, MPI_STATUS_IGNORE, ierr)
     ! TODO end
 
   end subroutine exchange
@@ -332,7 +340,7 @@ contains
     read(10, *) dummy, nx, ny
 
     call parallel_initialize(parallel, nx, ny)
-    call initialize_field_metadata(field0, nx, ny, parallel)
+    call initialize_field_metadata(field0, nx, ny, parallel)    
 
     ! The arrays for temperature field contain also a halo region
     allocate(field0%data(0:field0%nx+1, 0:field0%ny+1))
@@ -359,6 +367,7 @@ contains
     field0%data(  field0%nx+1, 0:field0%ny+1) = field0%data(  field0%nx, 0:field0%ny+1)
 
     close(10)
+
     deallocate(inner_data)
     if (parallel%rank == 0) then
        deallocate(full_data)

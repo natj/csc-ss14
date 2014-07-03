@@ -25,9 +25,24 @@ program coll_exer
   call init_buffers
   call print_buffers(sendbuf)
 
-  ! TODO start: perform collective communication
+  ! 5
+  !if(rank == 0) then
+  !   recvbuf = sendbuf
+  !end if
+  !call mpi_bcast(recvbuf, 8, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
 
-  ! TODO end
+  !5a
+  !call mpi_scatter(sendbuf, 2, MPI_INTEGER, &
+  !     recvbuf, 2, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr) 
+
+  !5b
+  counts = (/1,1,2,4/)
+  call mpi_gatherv(sendbuf, counts(rank+1), MPI_INTEGER, &
+       recvbuf, counts, (/0,1,2,4/), MPI_INTEGER, 1, MPI_COMM_WORLD, ierr)
+
+
+
+
 
   call print_buffers(recvbuf)
   call flush(6)
