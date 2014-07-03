@@ -36,11 +36,14 @@ program coll_exer
   !     recvbuf, 2, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr) 
 
   !5b
-  counts = (/1,1,2,4/)
-  call mpi_gatherv(sendbuf, counts(rank+1), MPI_INTEGER, &
-       recvbuf, counts, (/0,1,2,4/), MPI_INTEGER, 1, MPI_COMM_WORLD, ierr)
+  !counts = (/1,1,2,4/)
+  !NOTE: sendcounts must be a scalar i.e. what the rank sees
+  !call mpi_gatherv(sendbuf, counts(rank+1), MPI_INTEGER, &
+  !     recvbuf, counts, (/0,1,2,4/), MPI_INTEGER, 1, MPI_COMM_WORLD, ierr)
 
-
+  !5c
+  call mpi_reduce(sendbuf, recvbuf, 8, MPI_INTEGER, MPI_SUM, 0, &
+       MPI_COMM_WORLD, ierr)
 
 
 
