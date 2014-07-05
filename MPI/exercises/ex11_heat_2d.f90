@@ -153,7 +153,7 @@ contains
        sizes(2) = ny_local+2
     end if
 
-    call mpi_type_create_subarray(2, sizes, subsizes, offsets, MPI_ORDER_FORTRAN, &
+    call mpi_type_create_subarray(2, sizes, subsizes, offsets, MPI_ORDER_C, &
          MPI_DOUBLE_PRECISION, parallel%subarraytype, ierr)
     call mpi_type_commit(parallel%subarraytype, ierr)
 
@@ -284,31 +284,32 @@ contains
 
     integer :: ierr
 
-    ! XXX
+    ! XXX It is really much more simple to use sendrecv to avoid deadlocks
+    ! USE THEM!
+
     ! Send to left, receive from right
-    call mpi_send(field0%data(0, 1), 1, parallel%columntype, &
-         parallel%nleft, 11, parallel%comm, ierr)
-    call mpi_recv(field0%data(0, field0%ny+1), 1, parallel%columntype, &
-         parallel%nright, MPI_ANY_TAG, parallel%comm, MPI_STATUS_IGNORE, ierr)
+    call mpi_sendrecv(field0%data(0, 1), 1, parallel%columntype, &
+         parallel%nleft, 11, &
+         field0%data(0, field0%ny + 1), 1, parallel%columntype, &
+         parallel%nright, 11, &
+         parallel%comm, MPI_STATUS_IGNORE, ierr)
 
     ! Send to right, receive from left
-    call mpi_send(field0%data(0,field0%ny), 1, parallel%columntype, &
-         parallel%nright, 12, parallel%comm, ierr)
-    call mpi_recv(field0%data(0,0), 1, parallel%columntype, &
-         parallel%nleft, MPI_ANY_TAG, parallel%comm, MPI_STATUS_IGNORE, ierr)
-
+    call mpi_sendrecv(field0%data(0, field0%ny), 1, parallel%columntype, &
+         parallel%nright, 12, &
+         field0%data(0, 0), 1, parallel%columntype, &
+         parallel%nleft, 12, &
+         parallel%comm, MPI_STATUS_IGNORE, ierr)
+    
     ! Send to up receive from down
-    call mpi_send(field0%data(1, 0), 1, parallel%rowtype, &
-         parallel%nup, 13, parallel%comm, ierr)
-    call mpi_recv(field0%data(field0%nx+1, 0), 1, parallel%rowtype, &
-         parallel%ndown, MPI_ANY_TAG, parallel%comm, ierr)
+     call mpi_sendrecv(field0%data(1,0), 1, parallel%rowtype, &
+          parallel%nup, 13, field0%data(field0%nx+1,0), 1, parallel%rowtype, &
+          parallel%ndown, 13, parallel%comm, MPI_STATUS_IGNORE, ierr)
 
-    ! Send to the down, receive from up
-    call mpi_send(field0%data(field0%nx, 0), 1, parallel%rowtype, &
-         parallel%ndown, 14, parallel%comm, ierr)
-    call mpi_recv(field0%data(0, 0), 1, parallel%rowtype, &
-         parallel%nup, MPI_ANY_TAG, parallel%comm, ierr)
-
+     ! Send to the down, receive from up
+     call mpi_sendrecv(field0%data(field0%nx,0), 1, parallel%rowtype, &
+          parallel%ndown, 14, field0%data(0,0), 1, parallel%rowtype, &
+          parallel%nup, 14, parallel%comm, MPI_STATUS_IGNORE, ierr)
 
   end subroutine exchange
 
