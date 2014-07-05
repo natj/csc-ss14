@@ -213,21 +213,39 @@ contains
     type(parallel_data), intent(in) :: parallel
 
     integer :: ierr
+    integer :: req1
+    integer :: req2(2)
 
     ! TODO start: implement halo exchange
     ! Send to left, receive from right
-    call mpi_send(field0%data(:, 1), field0%nx+2, MPI_DOUBLE_PRECISION, &
-         parallel%nleft, 11, parallel%comm, ierr)
-    call mpi_recv(field0%data(:, field0%ny+1), field0%nx+2, MPI_DOUBLE_PRECISION, &
-         parallel%nright, 11, parallel%comm, MPI_STATUS_IGNORE, ierr)
-    !call mpi_sendrecv
+    !call mpi_sendrecv could also be used to avoid deadlocks
+!    call mpi_send(field0%data(:, 1), field0%nx+2, MPI_DOUBLE_PRECISION, &
+!         parallel%nleft, 11, parallel%comm, ierr)
+!    call mpi_recv(field0%data(:, field0%ny+1), field0%nx+2, MPI_DOUBLE_PRECISION, &
+!         parallel%nright, 11, parallel%comm, MPI_STATUS_IGNORE, ierr)
+
+    ! non-blocking communication
+    call mpi_isend(field0%data(:, 1), field0%nx+2, MPI_DOUBLE_PRECISION, &
+         parallel%nleft, 11, parallel%comm, req1, ierr)
+    call mpi_irecv(field0%data(:, field0%ny+1), field0%nx+2, MPI_DOUBLE_PRECISION, &
+         parallel%nright, 11, parallel%comm, req2(1) ,ierr)
+
 
     ! Send to right, receive from left
-    call mpi_send(field0%data(:,field0%ny), field0%nx+2, MPI_DOUBLE_PRECISION, &
-         parallel%nright, 12, parallel%comm, ierr)
-    call mpi_recv(field0%data(:,0), field0%nx+2, MPI_DOUBLE_PRECISION, &
-         parallel%nleft, 12, parallel%comm, MPI_STATUS_IGNORE, ierr)
-    ! TODO end
+!    call mpi_send(field0%data(:,field0%ny), field0%nx+2, MPI_DOUBLE_PRECISION, &
+!         parallel%nright, 12, parallel%comm, ierr)
+!    call mpi_recv(field0%data(:,0), field0%nx+2, MPI_DOUBLE_PRECISION, &
+!         parallel%nleft, 12, parallel%comm, MPI_STATUS_IGNORE, ierr)
+
+    ! non-blocking communication
+    call mpi_isend(field0%data(:,field0%ny), field0%nx+2, MPI_DOUBLE_PRECISION, &
+         parallel%nright, 12, parallel%comm, req1, ierr)
+    call mpi_irecv(field0%data(:,0), field0%nx+2, MPI_DOUBLE_PRECISION, &
+         parallel%nleft, 12, parallel%comm, req2(2), ierr)
+
+    ! wait and sync
+    !XXX: note that it is mpi_statusES_ignore
+    call mpi_waitall(2, req2, MPI_STATUSES_IGNORE, ierr)
 
   end subroutine exchange
 

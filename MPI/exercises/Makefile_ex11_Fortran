@@ -12,8 +12,8 @@ ifeq ($(COMP),gnu)
 CC=gcc
 FC=mpif90
 CCFLAGS=-O3
-FCFLAGS=-O3
-LIBS=-lpng
+FCFLAGS=-O3 -g
+LIBS=-lpng -dynamic
 endif
 
 ifeq ($(COMP),intel)

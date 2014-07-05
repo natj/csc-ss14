@@ -17,11 +17,9 @@
 
 module heat_mpi
   use mpi
-
   implicit none
 
   integer, parameter :: dp = SELECTED_REAL_KIND(12) 
-
   real(kind=dp), parameter :: DX = 0.01, DY = 0.01  ! Fixed grid spacing
 
   type :: field
@@ -116,20 +114,26 @@ contains
        call mpi_abort(MPI_COMM_WORLD, -2, ierr)
     end if
 
-    ! TODO start
-
     ! Create cartesian communicator based on dims variable
+    call mpi_cart_create(MPI_COMM_WORLD, 2, dims, periods, .true., parallel%comm, ierr)
 
     ! Find the neighbouring MPI tasks (parallel%nup, parallel%ndown, 
     ! parallel%nleft, parallel%nright) using MPI_Cart_shift
+    call mpi_cart_shift(parallel%comm, 1, 1, parallel%nleft, parallel%nright, ierr)
+    call mpi_cart_shift(parallel%comm, 0, 1, parallel%nup, parallel%ndown, ierr)
 
     !  Determine parallel%size and parallel%rank from newly created Cartesian comm
+    call mpi_comm_size(parallel%comm, parallel%size, ierr)
+    call mpi_comm_rank(parallel%comm, parallel%rank, ierr)
 
     ! Create datatypes for halo exchange
     ! Datatype for communication of rows (parallel%rowtype)
+    call mpi_type_vector(ny_local+2, 1, nx_local+2, MPI_DOUBLE_PRECISION, parallel%rowtype, ierr)
 
     ! Datatype for communication of columns (parallel%columntype)
+    call mpi_type_contiguous(nx_local+2, MPI_DOUBLE_PRECISION, parallel%columntype, ierr)
 
+    ! commit newly defined types
     call mpi_type_commit(parallel%rowtype, ierr)
     call mpi_type_commit(parallel%columntype, ierr)
 
@@ -141,19 +145,17 @@ contains
 
     ! Rank 0 uses datatype for receiving data into full array
     if (parallel%rank == 0) then
-       sizes(1) =      ! TODO
-       sizes(2) =      ! TODO
+       sizes(1) = nx
+       sizes(2) = ny
     ! Other ranks use datatype for sending the inner part of array
     else
-       sizes(1) =      ! TODO
-       sizes(2) =      ! TODO
+       sizes(1) = nx_local+2
+       sizes(2) = ny_local+2
     end if
 
-    call mpi_type_create_subarray( ,  ,  ,  ,  , &
-                                   , parallel%subarraytype, ierr)
+    call mpi_type_create_subarray(2, sizes, subsizes, offsets, MPI_ORDER_FORTRAN, &
+         MPI_DOUBLE_PRECISION, parallel%subarraytype, ierr)
     call mpi_type_commit(parallel%subarraytype, ierr)
-
-    ! TODO end
 
   end subroutine parallel_initialize
 
@@ -282,18 +284,31 @@ contains
 
     integer :: ierr
 
-    ! TODO start: implement 2D halo exchange using MPI datatypes
-
+    ! XXX
     ! Send to left, receive from right
+    call mpi_send(field0%data(0, 1), 1, parallel%columntype, &
+         parallel%nleft, 11, parallel%comm, ierr)
+    call mpi_recv(field0%data(0, field0%ny+1), 1, parallel%columntype, &
+         parallel%nright, MPI_ANY_TAG, parallel%comm, MPI_STATUS_IGNORE, ierr)
 
     ! Send to right, receive from left
+    call mpi_send(field0%data(0,field0%ny), 1, parallel%columntype, &
+         parallel%nright, 12, parallel%comm, ierr)
+    call mpi_recv(field0%data(0,0), 1, parallel%columntype, &
+         parallel%nleft, MPI_ANY_TAG, parallel%comm, MPI_STATUS_IGNORE, ierr)
 
     ! Send to up receive from down
+    call mpi_send(field0%data(1, 0), 1, parallel%rowtype, &
+         parallel%nup, 13, parallel%comm, ierr)
+    call mpi_recv(field0%data(field0%nx+1, 0), 1, parallel%rowtype, &
+         parallel%ndown, MPI_ANY_TAG, parallel%comm, ierr)
 
     ! Send to the down, receive from up
+    call mpi_send(field0%data(field0%nx, 0), 1, parallel%rowtype, &
+         parallel%ndown, 14, parallel%comm, ierr)
+    call mpi_recv(field0%data(0, 0), 1, parallel%rowtype, &
+         parallel%nup, MPI_ANY_TAG, parallel%comm, ierr)
 
-
-    ! TODO end
 
   end subroutine exchange
 
