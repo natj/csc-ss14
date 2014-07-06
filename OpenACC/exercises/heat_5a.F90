@@ -150,10 +150,14 @@ contains
     ny = curr%ny
     dx2 = curr % dx2
     dy2 = curr % dy2
+
+! Few hands on tweaks to avoid types using pointers
     cdata => curr % data
     pdata => prev % data
     
-    ! TODO: Implement computation on device with OpenACC
+    ! Implement computation on device with OpenACC
+!$acc parallel loop copyin(pdata) copyout(cdata) &
+!$acc collapse(2)
     do j=1,ny
        do i=1,nx
           cdata(i, j) = pdata(i, j) + a * dt * &
@@ -163,6 +167,8 @@ contains
                &   pdata(i, j+1)) / dy2)
        end do
     end do
+!$acc end parallel loop
+
   end subroutine evolve
 
   ! Output routine, saves the temperature distribution as a png image

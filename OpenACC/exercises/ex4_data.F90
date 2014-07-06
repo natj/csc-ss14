@@ -43,8 +43,8 @@ program ex4_data
   allocate(u(0:nx+1,0:ny+1))
   allocate(unew(0:nx+1,0:ny+1))
 
-  ! TODO: Initialize data region on device
-
+  ! Initialize data region on device
+!$acc data create(u, unew)
   call init(u)
   call init(unew)
 
@@ -60,6 +60,8 @@ program ex4_data
         write(0,*) iter,': norm,eps=',norm,eps
      endif
   enddo
+!$acc end data
+
 
   deallocate(u,unew)
 
@@ -75,15 +77,24 @@ contains
     real(kind=sp), intent(out) :: new(0:nx+1,0:ny+1)
     integer i,j
     ! TODO: Implement data initialization with OpenACC on device
+
+!$acc parallel present(new)
+
+!$acc loop &
+!$acc collapse(2)
     do j=0,ny+1
        do i=0,nx+1
           new(i,j) = real(0, sp)
        enddo
     enddo
-    ! TODO: Implement data initialization with OpenACC on device 
+!$acc end loop
+
+    ! Implement data initialization with OpenACC on device 
     new(:,ny+1) = real(1, sp)
-    ! TODO: Implement data initialization with OpenACC on device 
+    ! Implement data initialization with OpenACC on device 
     new(nx+1,:) = real(1, sp)
+!$acc end parallel
+
   end subroutine init
 
   subroutine update(new, old, norm)
@@ -95,20 +106,27 @@ contains
     integer i,j
     if (present(norm)) then
        norm = 0.0_sp
-       ! TODO: Implement computation with OpenACC on device
+       ! Implement computation with OpenACC on device
+
+!$acc parallel loop present(new) &
+!$acc collapse(2)
        do j=1,ny
           do i=1,nx
              new(i,j) = factor*(old(i-1,j) + old(i+1,j) + old(i,j-1) + old(i,j+1))
              norm = max(norm,abs(new(i,j) - old(i,j)))
           enddo
        enddo
+!$acc end parallel loop
     else
-       ! TODO: Implement computation with OpenACC on device
+!$acc parallel loop present(new) &
+!$acc collapse(2)
+       ! Implement computation with OpenACC on device
        do j=1,ny
           do i=1,nx
              new(i,j) = factor*(old(i-1,j) + old(i+1,j) + old(i,j-1) + old(i,j+1))
           enddo
        enddo
+!$acc end parallel loop
     endif
   end subroutine update
 

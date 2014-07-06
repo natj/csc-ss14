@@ -22,6 +22,12 @@ program dotprod
   ! TODO: 
   ! Implement dot product with OpenACC on device
   ! sum = (vecA, vecB) = vecB^T * vecA
+!$acc parallel loop reduction(+:sum)
+      do i = 1,nx
+      	 sum = sum + vecA(i)*vecB(i)
+      end do
+!$acc end parallel loop
+
      
   write(*,'(A30,X,ES18.5)') 'Sum using OpenACC reduction:', sum
 
