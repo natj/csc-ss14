@@ -16,6 +16,9 @@
 !  see <http://www.gnu.org/licenses/>.
 
 program heat_solve
+#ifdef _OPENACC
+  use openacc
+#endif
   use heat
   implicit none
 
