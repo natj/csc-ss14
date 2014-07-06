@@ -14,18 +14,19 @@ program hello
      !call mpi_abort(mpi_comm_world, rc)
   end if
 
-
   call mpi_comm_size(MPI_COMM_WORLD, msize, rc)
   call mpi_comm_rank(MPI_COMM_WORLD, rank, rc)
 
-!$omp parallel private(thread, num_threads)
+  msg = -1
+
+!$omp parallel private(thread, num_threads, msg, i)
   thread = omp_get_thread_num()
   num_threads = omp_get_num_threads()
 
-  if (thread == 0) then
-     !omp single
+  if (rank == 0) then
+     !$omp single
      write(*,*) num_threads,' threads in master rank'
-     !omp end single
+     !$omp end single
      do i = 1,msize-1
         call mpi_send(thread, 1, MPI_INTEGER, i, thread, MPI_COMM_WORLD, rc)
      end do

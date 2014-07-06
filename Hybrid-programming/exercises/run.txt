@@ -1,3 +1,5 @@
+#personal
+
 #compile
 mpif90 -o ex1 -fopenmp ex1.f90
 
@@ -5,3 +7,8 @@ mpif90 -o ex1 -fopenmp ex1.f90
 export OMP_NUM_THREADS=4
 mpirun -np 4 -npernode 4 ./ex1
 
+#sisu
+
+module switch 
+ftn -o ex1 ex1.f90
+aprun -n 4 -d 4 -e MPICH_MAX_THREAD_SAFETY=multiple -e OMP_NUM_THREADS=4 ./ex1
