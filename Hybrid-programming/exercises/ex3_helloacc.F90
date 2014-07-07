@@ -57,11 +57,15 @@ program ex3_helloacc
   ! TODO: create vec on device with OpenACC
 
   ! Initialize the data
+!$acc data create(vec(1:vecsize))
   call initialize(vecsize, vec)
 
   ! Broadcast data vector from rank 0 to all other processes
   ! TODO: Move data to device or use device data in MPI call
+
+!$acc host_data use_device(vec)
   call MPI_Bcast(vec, vecsize, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, rc)
+!$acc end host_data
 
   ! Compute with OpenACC
   call compute(vecsize, vec, rank)
@@ -70,8 +74,10 @@ program ex3_helloacc
      ! Receive results from other ranks
      do p=1,nprocs-1
         ! TODO: Move data to device or use device data in MPI call
+!$acc host_data use_device(vec)
         call MPI_Recv(vec, vecsize, MPI_DOUBLE_PRECISION, p, &
              MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE, rc)
+!$acc end host_data
 
         ! Compute sum of vector
         csum = checksum(vecsize, vec)
@@ -81,9 +87,14 @@ program ex3_helloacc
   else 
      ! Send result back to rank 0
      ! TODO: Move data from device or use device data in MPI call
+
+!$acc host_data use_device(vec)
      call MPI_Send(vec, vecsize, MPI_DOUBLE_PRECISION, 0, &
           0, MPI_COMM_WORLD, rc)
+!$acc end host_data
   end if 
+
+!$acc end data
 
   call MPI_Finalize(rc)
   deallocate(vec)

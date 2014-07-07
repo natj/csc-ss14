@@ -1,14 +1,26 @@
-#personal
+# MPI + OpenMP
 
-#compile
+##personal
+###compile
 mpif90 -o ex1 -fopenmp ex1.f90
 
 #run
 export OMP_NUM_THREADS=4
 mpirun -np 4 -npernode 4 ./ex1
 
-#sisu
-
+##sisu
 module switch 
 ftn -o ex1 ex1.f90
 aprun -n 4 -d 4 -e MPICH_MAX_THREAD_SAFETY=multiple -e OMP_NUM_THREADS=4 ./ex1
+
+
+# MPI + OpenACC
+## taito-gpu
+
+module purge
+module load pgi/14.4
+module load cuda
+module load openmpi
+
+mpif90 -g -acc -ta=nvidia,kepler+ ex3.f90 -o ex
+srun -N2 -n4 -c1 -p gpu --reservation=summer --gres=gpu:2 ./ex
