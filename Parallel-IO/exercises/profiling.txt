@@ -1,0 +1,22 @@
+pat_build binary.out
+aprun -x-x-x ./exe.out+pat
+pat_report output.xf > samp_16-a.txt
+
+#and then same for samp_32-a.txt and so on
+
+diff -LW 120 samp_16-a.txt samp_32-a.txt | less
+
+pat_build -O ex_xx.out
+
+aprun -x-x-x ./exe.out+apa
+
+pat_report xxxx.xf > trace samp_32-a.txt
+
+app2 xxx.ap2 
+
+>mpi_sendrecv seems to take lot of time
+>put mpi_barrier
+>its mpi_barrier taking time
+>load imbalance
+
+
